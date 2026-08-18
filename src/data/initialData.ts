@@ -14,6 +14,13 @@ import {
   PricingConfig
 } from '../types';
 
+import volvoFh500Img from '../assets/images/volvo_fh500_tanker_1787055546514.jpg';
+import volvoFmx460Img from '../assets/images/volvo_fmx460_hauler_1787055560785.jpg';
+import actros3344Img from '../assets/images/actros_3344_hauler_1787055574185.jpg';
+import manTgsImg from '../assets/images/man_tgs_tanker_1787057914245.jpg';
+import ivecoUrbanImg from '../assets/images/iveco_urban_tanker_1787057923906.jpg';
+import volvoHeavyImg from '../assets/images/volvo_heavy_tanker_1787057933860.jpg';
+
 export const initialPricingConfig: PricingConfig = {
   basePerLiterRate: 0.085,
   volumeDiscountThreshold36k: 0.065,
@@ -266,7 +273,7 @@ export const initialTankers: Tanker[] = [
     hasVaporRecovery: true,
     hasDigitalFlowMeter: true,
     hasHighFlowPump: true,
-    imageUrl: '/src/assets/images/volvo_fh500_tanker_1787055546514.jpg',
+    imageUrl: volvoFh500Img,
     notes: 'Equipped with certified pneumatic emergency shut-off valves and dual earthing grounding sensors.',
     isDemo: false
   },
@@ -296,7 +303,7 @@ export const initialTankers: Tanker[] = [
     hasVaporRecovery: true,
     hasDigitalFlowMeter: true,
     hasHighFlowPump: false,
-    imageUrl: '/src/assets/images/volvo_fmx460_hauler_1787055560785.jpg',
+    imageUrl: volvoFmx460Img,
     notes: 'Calibrated specifically for retail service station multi-compartment drop off.',
     isDemo: false
   },
@@ -324,7 +331,7 @@ export const initialTankers: Tanker[] = [
     hasVaporRecovery: true,
     hasDigitalFlowMeter: true,
     hasHighFlowPump: true,
-    imageUrl: '/src/assets/images/actros_3344_hauler_1787055574185.jpg',
+    imageUrl: actros3344Img,
     notes: 'High-speed discharge pump (850 L/min) ideal for fast turnaround factory generator tank fills.',
     isDemo: false
   },
@@ -353,7 +360,7 @@ export const initialTankers: Tanker[] = [
     hasVaporRecovery: true,
     hasDigitalFlowMeter: true,
     hasHighFlowPump: true,
-    imageUrl: 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: manTgsImg,
     notes: 'Max-payload aluminum alloy barrel designed for long-distance mining bulk replenishment haulage.',
     isDemo: false
   },
@@ -381,7 +388,7 @@ export const initialTankers: Tanker[] = [
     hasVaporRecovery: true,
     hasDigitalFlowMeter: true,
     hasHighFlowPump: true,
-    imageUrl: 'https://images.unsplash.com/photo-1562971179-4ad6903a7ed6?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: ivecoUrbanImg,
     notes: 'Equipped with 45-meter electric hose reel and automatic shutoff nozzle for tight urban construction sites.',
     isDemo: false
   },
@@ -410,7 +417,7 @@ export const initialTankers: Tanker[] = [
     hasVaporRecovery: false,
     hasDigitalFlowMeter: false,
     hasHighFlowPump: true,
-    imageUrl: 'https://images.unsplash.com/photo-1508974239320-0a029497e820?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: volvoHeavyImg,
     notes: 'Scheduled 90-day hydrostatic tank re-certification & pressure relief valve recalibration.',
     isDemo: false
   }

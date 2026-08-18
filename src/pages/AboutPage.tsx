@@ -39,6 +39,35 @@ export const AboutPage: React.FC<AboutPageProps> = ({ setActivePage }) => {
           </p>
         </div>
 
+        {/* Hero Visual Banner */}
+        <div className="relative h-64 sm:h-80 w-full overflow-hidden rounded-2xl border border-slate-800 bg-[#0A0A0B] shadow-2xl">
+          <img 
+            src="/images/armtells_terminal_depot_1787057958107.jpg" 
+            alt="Armtells Bulk Petroleum Terminal Operations" 
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1592838064575-70ed626d3a0e?auto=format&fit=crop&w=1400&q=80';
+            }}
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 right-4 flex items-end justify-between">
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest bg-black/70 backdrop-blur px-2.5 py-1 rounded border border-amber-400/30 inline-block">
+                TEMA BULK DEPOT & LOGISTICS CORRIDORS
+              </span>
+              <h3 className="text-lg sm:text-xl font-bold text-white uppercase">
+                GSA-Calibrated Tanker Fleet • 24/7 Monitored Dispatch
+              </h3>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 font-mono text-xs text-slate-300 bg-black/60 backdrop-blur px-3 py-1.5 rounded border border-white/10">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>100% NPA Hazmat Certified</span>
+            </div>
+          </div>
+        </div>
+
         {/* Narrative & Core Positioning */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">

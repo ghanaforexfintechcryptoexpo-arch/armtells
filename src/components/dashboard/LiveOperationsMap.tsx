@@ -22,7 +22,8 @@ import {
   Clock,
   Phone,
   Eye,
-  EyeOff
+  EyeOff,
+  Fuel
 } from 'lucide-react';
 import { Tanker, DeliveryRequest, TankerStatus } from '../../types';
 
@@ -37,6 +38,9 @@ interface LiveOperationsMapProps {
 
 interface SimulatedTankerPosition {
   tankerId: string;
+  registrationNumber?: string;
+  makeModel?: string;
+  totalCapacity: number;
   lat: number;
   lng: number;
   speedKmH: number;
@@ -48,10 +52,18 @@ interface SimulatedTankerPosition {
   cargoDescription: string;
   cargoVolume: number;
   fuelType: string;
+  unNumber?: string;
+  hazardClass?: string;
   eta: string;
   activeDeliveryRef?: string;
   driverName: string;
+  driverStatus: 'ON_DUTY' | 'ON_DELIVERY' | 'REST_PERIOD' | 'OFF_DUTY' | 'STANDBY';
+  driverStatusNote?: string;
   driverPhone: string;
+  driverLicense?: string;
+  driverHazmatCert?: string;
+  driverExperience?: number;
+  driverRating?: number;
   sealStatus: string;
   tempCelsius: number;
   pressureBar: number;
@@ -162,6 +174,8 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
   const [showTerminals, setShowTerminals] = useState(true);
   const [showCustomerSites, setShowCustomerSites] = useState(true);
   const [showRouteCorridors, setShowRouteCorridors] = useState(true);
+  const [showFuelBadges, setShowFuelBadges] = useState(true);
+  const [hoveredTankerId, setHoveredTankerId] = useState<string | null>(null);
 
   // Internal selected tanker state
   const [internalSelectedTankerId, setInternalSelectedTankerId] = useState<string | null>('ART-TK-01');
@@ -180,6 +194,9 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
     const initial: Record<string, SimulatedTankerPosition> = {
       'ART-TK-01': {
         tankerId: 'ART-TK-01',
+        registrationNumber: 'GN-4821-23',
+        makeModel: 'Volvo FH 500 6x4 Heavy Tanker',
+        totalCapacity: 45000,
         lat: 5.3521,
         lng: -0.6288,
         speedKmH: 62,
@@ -191,16 +208,27 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
         cargoDescription: 'Automotive Gas Oil (AGO / Diesel 50ppm)',
         cargoVolume: 45000,
         fuelType: 'DIESEL_AGO',
+        unNumber: 'UN 1202',
+        hazardClass: 'Class 3 Flammable Liquid (Hazard 30)',
         eta: 'Today at 16:45 GMT',
         activeDeliveryRef: 'ART-2026-000101',
         driverName: 'Samuel Mensah',
+        driverStatus: 'ON_DUTY',
+        driverStatusNote: 'Active Driving (Shift: 4.2h / 8h)',
         driverPhone: '+233 24 555 3001',
+        driverLicense: 'GH-DRV-90822-CL-F (Articulated)',
+        driverHazmatCert: 'HAZ-NPA-2025-0891 (Valid 2027)',
+        driverExperience: 14,
+        driverRating: 4.95,
         sealStatus: 'Seals #ARM-88910 to #ARM-88914 Intact',
         tempCelsius: 29.4,
         pressureBar: 1.02
       },
       'ART-TK-02': {
         tankerId: 'ART-TK-02',
+        registrationNumber: 'GT-1904-24',
+        makeModel: 'Volvo FMX 460 6x4 Heavy Hauler',
+        totalCapacity: 36000,
         lat: 5.6821,
         lng: 0.0124,
         speedKmH: 0,
@@ -212,16 +240,27 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
         cargoDescription: 'Premium Motor Spirit (PMS Unleaded RON 95)',
         cargoVolume: 36000,
         fuelType: 'PETROL_PMS',
+        unNumber: 'UN 1203',
+        hazardClass: 'Class 3 Highly Flammable Liquid',
         eta: 'Today at 13:15 GMT',
         activeDeliveryRef: 'ART-2026-000102',
         driverName: 'Emmanuel Kofi',
+        driverStatus: 'ON_DELIVERY',
+        driverStatusNote: 'Loading at Gantry Bay #03 (Top Ullage)',
         driverPhone: '+233 24 555 3002',
+        driverLicense: 'GH-DRV-81442-CL-F (Articulated)',
+        driverHazmatCert: 'HAZ-NPA-2025-0442 (Valid 2027)',
+        driverExperience: 11,
+        driverRating: 4.90,
         sealStatus: 'Gantry Meter #04 Cleared',
         tempCelsius: 31.0,
         pressureBar: 1.01
       },
       'ART-TK-03': {
         tankerId: 'ART-TK-03',
+        registrationNumber: 'GW-8832-22',
+        makeModel: 'Mercedes-Benz Actros 3344 6x4',
+        totalCapacity: 28000,
         lat: 5.6702,
         lng: 0.0019,
         speedKmH: 0,
@@ -230,18 +269,29 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
         direction: 1,
         status: 'AVAILABLE',
         currentLocationName: 'Tema Central Logistics Staging Yard',
-        cargoDescription: 'Tanks Purged / Ready for Loading',
+        cargoDescription: 'Tanks Degassed / Vapor Purged',
         cargoVolume: 0,
         fuelType: 'DIESEL_AGO',
-        eta: 'Standby Dispatch',
+        unNumber: 'UN 1202',
+        hazardClass: 'Class 3 Flammable Liquid',
+        eta: 'Standby Dispatch Call',
         driverName: 'Kwabena Boateng',
+        driverStatus: 'STANDBY',
+        driverStatusNote: 'Pre-Trip Inspection Complete (Ready)',
         driverPhone: '+233 24 555 3003',
-        sealStatus: 'Vapor Certified',
+        driverLicense: 'GH-DRV-73319-CL-F',
+        driverHazmatCert: 'HAZ-NPA-2025-1102 (Valid 2027)',
+        driverExperience: 9,
+        driverRating: 4.88,
+        sealStatus: 'Vapor Certified & Calibrated',
         tempCelsius: 27.5,
         pressureBar: 1.00
       },
       'ART-TK-04': {
         tankerId: 'ART-TK-04',
+        registrationNumber: 'GE-3310-25',
+        makeModel: 'MAN TGS 33.480 6x4 B-Train Tanker',
+        totalCapacity: 48000,
         lat: 6.0412,
         lng: -0.4512,
         speedKmH: 68,
@@ -250,19 +300,30 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
         direction: 1,
         status: 'IN_TRANSIT',
         currentLocationName: 'N6 Highway (Suhum Commercial Junction)',
-        cargoDescription: 'Low Sulphur Mining Diesel (B-Train)',
+        cargoDescription: 'Low Sulphur Mining Diesel (50ppm AGO)',
         cargoVolume: 48000,
         fuelType: 'DIESEL_AGO',
+        unNumber: 'UN 1202',
+        hazardClass: 'Class 3 Flammable Liquid (Hazard 30)',
         eta: 'Today at 19:30 GMT',
         activeDeliveryRef: 'ART-2026-000103',
         driverName: 'Isaac Darko',
+        driverStatus: 'ON_DUTY',
+        driverStatusNote: 'In Transit Corridor (Speed Regulated 70km/h)',
         driverPhone: '+233 24 555 3004',
+        driverLicense: 'GH-DRV-65902-CL-F',
+        driverHazmatCert: 'HAZ-NPA-2025-0721 (Valid 2027)',
+        driverExperience: 16,
+        driverRating: 4.96,
         sealStatus: 'Seals #ARM-90112 to #ARM-90115 Verified',
         tempCelsius: 28.8,
         pressureBar: 1.03
       },
       'ART-TK-05': {
         tankerId: 'ART-TK-05',
+        registrationNumber: 'GS-7712-24',
+        makeModel: 'Iveco T-Way 430 Rigid Urban Tanker',
+        totalCapacity: 18000,
         lat: 5.6110,
         lng: -0.1980,
         speedKmH: 34,
@@ -271,18 +332,29 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
         direction: 1,
         status: 'AVAILABLE',
         currentLocationName: 'Accra North Distribution Corridor',
-        cargoDescription: 'Urban Delivery Diesel (Metered Pump)',
-        cargoVolume: 18000,
+        cargoDescription: 'Urban Delivery Diesel (Digital Flow Metered)',
+        cargoVolume: 12000,
         fuelType: 'DIESEL_AGO',
-        eta: 'On Local Route',
+        unNumber: 'UN 1202',
+        hazardClass: 'Class 3 Flammable Liquid',
+        eta: 'On Urban Distribution Route',
         driverName: 'Joseph Osei',
+        driverStatus: 'ON_DUTY',
+        driverStatusNote: 'Active Delivery Route (Urban Metering)',
         driverPhone: '+233 24 555 3005',
-        sealStatus: 'Calibrated Flow Meter Active',
+        driverLicense: 'GH-DRV-54109-CL-C',
+        driverHazmatCert: 'HAZ-NPA-2025-0319 (Valid 2027)',
+        driverExperience: 8,
+        driverRating: 4.85,
+        sealStatus: 'Calibrated Digital Flow Meter Active',
         tempCelsius: 29.1,
         pressureBar: 1.01
       },
       'ART-TK-06': {
         tankerId: 'ART-TK-06',
+        registrationNumber: 'GT-6019-21',
+        makeModel: 'Volvo FH 500 6x4 Heavy Tanker',
+        totalCapacity: 45000,
         lat: 5.6601,
         lng: 0.0050,
         speedKmH: 0,
@@ -294,10 +366,18 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
         cargoDescription: 'Tanks Degassed for Hydrostatic Inspection',
         cargoVolume: 0,
         fuelType: 'HEAVY_FUEL_OIL_HFO',
-        eta: 'Maintenance Bay 2',
-        driverName: 'Service Tech Dept',
+        unNumber: 'UN 3082',
+        hazardClass: 'Class 9 / Flammable Class 3',
+        eta: 'Maintenance Bay #02',
+        driverName: 'Technical Service Bay',
+        driverStatus: 'OFF_DUTY',
+        driverStatusNote: 'Under Scheduled 90-Day Inspection',
         driverPhone: '+233 30 299 8811',
-        sealStatus: 'Inspection Seal Active',
+        driverLicense: 'NPA Depot Workshop Certified',
+        driverHazmatCert: 'GSA Calibration Cert CAL-2025-331',
+        driverExperience: 15,
+        driverRating: 5.00,
+        sealStatus: 'Maintenance Lockout Seal Active',
         tempCelsius: 26.0,
         pressureBar: 1.00
       }
@@ -305,35 +385,238 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
     return initial;
   });
 
-  // Create custom Leaflet HTML icon for Tanker
-  const createTankerIcon = (tankerId: string, status: TankerStatus, heading: number, isSelected: boolean) => {
+  // Create Rich Custom Hover Tooltip HTML for Tanker Marker
+  const createTankerHoverTooltipHTML = (pos: SimulatedTankerPosition) => {
     const statusColor = 
-      status === 'IN_TRANSIT' ? '#FF6B00' :
-      status === 'ON_DELIVERY' ? '#F59E0B' :
-      status === 'AVAILABLE' ? '#10B981' :
-      status === 'UNDER_MAINTENANCE' ? '#F43F5E' : '#64748B';
+      pos.status === 'IN_TRANSIT' ? '#FF6B00' :
+      pos.status === 'ON_DELIVERY' ? '#F59E0B' :
+      pos.status === 'AVAILABLE' ? '#10B981' :
+      pos.status === 'UNDER_MAINTENANCE' ? '#F43F5E' : '#64748B';
 
-    const pulseClass = (status === 'IN_TRANSIT' || status === 'ON_DELIVERY') ? 'animate-ping' : '';
+    const statusLabel = 
+      pos.status === 'IN_TRANSIT' ? 'IN TRANSIT' :
+      pos.status === 'ON_DELIVERY' ? 'DISPATCH / LOADING' :
+      pos.status === 'AVAILABLE' ? 'STAGING AVAILABLE' :
+      pos.status === 'UNDER_MAINTENANCE' ? 'MAINTENANCE BAY' : pos.status;
+
+    const fillPercentage = pos.totalCapacity > 0 ? Math.min(100, Math.round((pos.cargoVolume / pos.totalCapacity) * 100)) : 0;
+
+    const driverStatusColor = 
+      pos.driverStatus === 'ON_DUTY' ? '#10B981' :
+      pos.driverStatus === 'ON_DELIVERY' ? '#F59E0B' :
+      pos.driverStatus === 'STANDBY' ? '#38BDF8' : '#94A3B8';
+
+    const fuelProgressGradient = 
+      pos.fuelType === 'DIESEL_AGO' ? 'linear-gradient(90deg, #FF6B00 0%, #FFA800 100%)' :
+      pos.fuelType === 'PETROL_PMS' ? 'linear-gradient(90deg, #38BDF8 0%, #0284C7 100%)' :
+      pos.fuelType === 'JET_A1' ? 'linear-gradient(90deg, #A855F7 0%, #6366F1 100%)' :
+      'linear-gradient(90deg, #10B981 0%, #059669 100%)';
+
+    return `
+      <div style="
+        background-color: #0A0A0B;
+        color: #F8FAFC;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-top: 3px solid ${statusColor};
+        border-radius: 6px;
+        padding: 12px;
+        width: 300px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 0, 0, 0.7);
+        pointer-events: none;
+      ">
+        <!-- Header Strip: Tanker ID + Registration + Status Badge -->
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em;">
+                ${pos.tankerId}
+              </span>
+              <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 700; color: #94A3B8; background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.1);">
+                ${pos.registrationNumber || 'GN-4821-23'}
+              </span>
+            </div>
+            <div style="font-size: 10px; color: #64748B; margin-top: 2px; font-family: ui-monospace, monospace;">
+              ${pos.makeModel || 'Volvo FH 500 6x4 Heavy BRV'}
+            </div>
+          </div>
+
+          <div style="
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 7px;
+            border-radius: 3px;
+            background-color: ${statusColor}1F;
+            border: 1px solid ${statusColor}55;
+            color: ${statusColor};
+            font-family: ui-monospace, monospace;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+          ">
+            <span style="width: 5px; height: 5px; border-radius: 9999px; background-color: ${statusColor};"></span>
+            <span>${statusLabel}</span>
+          </div>
+        </div>
+
+        <!-- 1. FUEL VOLUME & CARGO CARD -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; padding: 8px 10px; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <span style="font-size: 9px; font-family: ui-monospace, monospace; text-transform: uppercase; color: #94A3B8; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+              <svg style="width: 10px; height: 10px; color: #FF6B00;" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              </svg>
+              Current Fuel Volume
+            </span>
+            <span style="font-family: ui-monospace, monospace; font-size: 12px; font-weight: 800; color: #FF6B00;">
+              ${pos.cargoVolume > 0 ? pos.cargoVolume.toLocaleString() + ' L' : '0 L (PURGED)'}
+            </span>
+          </div>
+
+          <!-- Volume Percentage Progress Bar -->
+          <div style="width: 100%; height: 7px; background-color: rgba(255,255,255,0.1); border-radius: 9999px; overflow: hidden; margin-bottom: 5px;">
+            <div style="width: ${fillPercentage}%; height: 100%; border-radius: 9999px; background: ${fuelProgressGradient}; transition: width 0.4s ease;"></div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 9px; font-family: ui-monospace, monospace; color: #64748B;">
+            <span>Capacity: <strong style="color: #FFFFFF;">${pos.totalCapacity.toLocaleString()} L</strong> (${fillPercentage}% Full)</span>
+            <span style="color: #F8FAFC; font-weight: 700;">${pos.unNumber || 'UN 1202'}</span>
+          </div>
+
+          ${pos.cargoVolume > 0 ? `
+            <div style="font-size: 9.5px; font-weight: 700; color: #CBD5E1; margin-top: 5px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 4px;">
+              ${pos.cargoDescription}
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- 2. DRIVER PROFILE & STATUS CARD -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 4px; padding: 8px 10px; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+            <span style="font-size: 9px; font-family: ui-monospace, monospace; text-transform: uppercase; color: #94A3B8; font-weight: 700;">
+              Certified Dangerous Goods Driver
+            </span>
+            <span style="font-family: ui-monospace, monospace; font-size: 8.5px; font-weight: 700; color: ${driverStatusColor}; display: flex; align-items: center; gap: 3px;">
+              <span style="width: 4px; height: 4px; border-radius: 9999px; background-color: ${driverStatusColor};"></span>
+              ${pos.driverStatus.replace('_', ' ')}
+            </span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <div style="width: 24px; height: 24px; border-radius: 9999px; background-color: #18181B; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 800; color: #38BDF8;">
+                ${pos.driverName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </div>
+              <div>
+                <div style="font-size: 11px; font-weight: 700; color: #FFFFFF; line-height: 1.1;">
+                  ${pos.driverName}
+                </div>
+                <div style="font-size: 9px; font-family: ui-monospace, monospace; color: #38BDF8;">
+                  ${pos.driverPhone}
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: right; font-family: ui-monospace, monospace; font-size: 9px;">
+              <span style="color: #F59E0B; font-weight: 700;">★ ${pos.driverRating || 4.9}</span>
+              <div style="color: #64748B;">${pos.driverExperience || 12} yrs exp</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 5px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.06); font-family: ui-monospace, monospace; font-size: 8.5px; color: #94A3B8; display: flex; justify-content: space-between;">
+            <span>Hazmat: <strong style="color: #E2E8F0;">${pos.driverHazmatCert || 'NPA-DG-2026'}</strong></span>
+            <span style="color: #10B981;">Medical Cleared</span>
+          </div>
+        </div>
+
+        <!-- 3. LIVE TRANSIT TELEMETRY STRIP -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-family: ui-monospace, monospace; font-size: 9px; margin-bottom: 6px;">
+          <div style="background: rgba(0,0,0,0.5); padding: 4px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="color: #64748B; display: block; font-size: 8px;">SPEED / BEARING</span>
+            <strong style="color: #FFFFFF;">${pos.speedKmH} km/h • ${pos.headingDeg}°</strong>
+          </div>
+          <div style="background: rgba(0,0,0,0.5); padding: 4px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="color: #64748B; display: block; font-size: 8px;">ESTIMATED ARRIVAL</span>
+            <strong style="color: #38BDF8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">${pos.eta}</strong>
+          </div>
+        </div>
+
+        <div style="font-size: 8px; font-family: ui-monospace, monospace; color: #64748B; text-align: center;">
+          Click marker to lock telemetry & route inspect in sidebar
+        </div>
+      </div>
+    `;
+  };
+
+  // Create custom Leaflet HTML icon for Tanker
+  const createTankerIcon = (
+    tankerId: string, 
+    pos: SimulatedTankerPosition, 
+    isSelected: boolean,
+    isHovered: boolean,
+    showBadge: boolean
+  ) => {
+    const statusColor = 
+      pos.status === 'IN_TRANSIT' ? '#FF6B00' :
+      pos.status === 'ON_DELIVERY' ? '#F59E0B' :
+      pos.status === 'AVAILABLE' ? '#10B981' :
+      pos.status === 'UNDER_MAINTENANCE' ? '#F43F5E' : '#64748B';
+
+    const pulseClass = (pos.status === 'IN_TRANSIT' || pos.status === 'ON_DELIVERY') ? 'animate-ping' : '';
+    const activeHighlight = isSelected || isHovered;
+    const volumeDisplay = pos.cargoVolume > 0 ? `${(pos.cargoVolume / 1000).toFixed(0)}k L` : '0 L';
 
     const html = `
-      <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-        ${isSelected ? `
-          <div style="position: absolute; inset: -4px; border-radius: 9999px; border: 2px solid #FF6B00; box-shadow: 0 0 15px rgba(255, 107, 0, 0.6);"></div>
+      <div style="position: relative; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease;">
+        ${activeHighlight ? `
+          <div style="position: absolute; inset: -5px; border-radius: 9999px; border: 2px solid ${statusColor}; box-shadow: 0 0 18px ${statusColor}88;"></div>
         ` : ''}
         
         <!-- Radar Pulse wave -->
-        <div style="position: absolute; inset: 6px; border-radius: 9999px; background-color: ${statusColor}; opacity: 0.25;" class="${pulseClass}"></div>
+        <div style="position: absolute; inset: 8px; border-radius: 9999px; background-color: ${statusColor}; opacity: 0.3;" class="${pulseClass}"></div>
         
         <!-- Main Marker Circle -->
-        <div style="position: relative; width: 32px; height: 32px; border-radius: 9999px; background-color: #0A0A0B; border: 2px solid ${statusColor}; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.8);">
-          <svg style="width: 16px; height: 16px; color: ${statusColor}; transform: rotate(${heading}deg); transition: transform 0.4s ease;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <div style="
+          position: relative; 
+          width: 34px; 
+          height: 34px; 
+          border-radius: 9999px; 
+          background-color: #0A0A0B; 
+          border: 2px solid ${statusColor}; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          box-shadow: 0 4px 14px rgba(0,0,0,0.9);
+          transform: ${activeHighlight ? 'scale(1.12)' : 'scale(1)'};
+          transition: transform 0.2s ease;
+        ">
+          <svg style="width: 17px; height: 17px; color: ${statusColor}; transform: rotate(${pos.headingDeg}deg); transition: transform 0.4s ease;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2L19 21L12 17L5 21L12 2Z"/>
           </svg>
         </div>
 
-        <!-- Tanker ID Micro Badge -->
-        <div style="position: absolute; bottom: -10px; background-color: #0A0A0B; border: 1px solid ${statusColor}; color: #FFFFFF; font-family: monospace; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 2px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.9);">
-          ${tankerId}
+        <!-- Tanker ID & Fuel Volume Micro Badge -->
+        <div style="
+          position: absolute; 
+          bottom: -11px; 
+          background-color: #0A0A0B; 
+          border: 1px solid ${statusColor}; 
+          color: #FFFFFF; 
+          font-family: ui-monospace, monospace; 
+          font-size: 8px; 
+          font-weight: 800; 
+          padding: 1px 5px; 
+          border-radius: 3px; 
+          white-space: nowrap; 
+          box-shadow: 0 2px 5px rgba(0,0,0,0.9);
+          display: flex;
+          align-items: center;
+          gap: 3px;
+        ">
+          <span>${tankerId}</span>
+          ${showBadge ? `<span style="color: ${pos.cargoVolume > 0 ? '#FF6B00' : '#94A3B8'};">• ${volumeDisplay}</span>` : ''}
         </div>
       </div>
     `;
@@ -341,9 +624,9 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
     return L.divIcon({
       className: 'custom-tanker-pin',
       html: html,
-      iconSize: [44, 44],
-      iconAnchor: [22, 22],
-      popupAnchor: [0, -22]
+      iconSize: [50, 50],
+      iconAnchor: [25, 25],
+      popupAnchor: [0, -25]
     });
   };
 
@@ -517,7 +800,7 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
 
   }, [showRouteCorridors, showTerminals, showCustomerSites, selectedTankerId]);
 
-  // 3. Render and Update Live Tanker Markers
+  // 3. Render and Update Live Tanker Markers with Dynamic Hover States
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -532,16 +815,37 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
       }
 
       const isSelected = selectedTankerId === tId;
-      const icon = createTankerIcon(tId, pos.status, pos.headingDeg, isSelected);
+      const isHovered = hoveredTankerId === tId;
+      const icon = createTankerIcon(tId, pos, isSelected, isHovered, showFuelBadges);
+      const tooltipHtml = createTankerHoverTooltipHTML(pos);
 
       if (markersRef.current[tId]) {
-        // Update existing marker position & icon
-        markersRef.current[tId].setLatLng([pos.lat, pos.lng]);
-        markersRef.current[tId].setIcon(icon);
+        // Update existing marker position, icon and hover tooltip content
+        const existingMarker = markersRef.current[tId];
+        existingMarker.setLatLng([pos.lat, pos.lng]);
+        existingMarker.setIcon(icon);
+        existingMarker.setTooltipContent(tooltipHtml);
       } else {
-        // Create new marker
+        // Create new marker with interactive hover tooltip
         const marker = L.marker([pos.lat, pos.lng], { icon }).addTo(map);
         
+        // Bind rich dark tooltip on hover
+        marker.bindTooltip(tooltipHtml, {
+          direction: 'top',
+          className: 'dark-tanker-tooltip',
+          offset: [0, -26],
+          opacity: 1,
+          sticky: false
+        });
+
+        marker.on('mouseover', () => {
+          setHoveredTankerId(tId);
+        });
+
+        marker.on('mouseout', () => {
+          setHoveredTankerId(null);
+        });
+
         marker.on('click', () => {
           handleSelectTanker(tId);
         });
@@ -550,7 +854,7 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
       }
     });
 
-  }, [simulatedPositions, activeTankerFilter, selectedTankerId]);
+  }, [simulatedPositions, activeTankerFilter, selectedTankerId, hoveredTankerId, showFuelBadges]);
 
   // 4. GPS Simulation Loop (Smooth waypoint interpolation & movement)
   useEffect(() => {
@@ -718,6 +1022,16 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
 
           {/* Layer toggles */}
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowFuelBadges(!showFuelBadges)}
+              className={`p-1.5 text-[10px] font-mono rounded-sm border transition cursor-pointer flex items-center gap-1 ${
+                showFuelBadges ? 'bg-[#FF6B00]/15 text-[#FF6B00] border-[#FF6B00]/40' : 'bg-white/5 text-slate-500 border-white/10'
+              }`}
+              title="Toggle Fuel Volume Badges on Map Markers"
+            >
+              <Fuel className="w-3 h-3" /> Volume Badges
+            </button>
+
             <button
               onClick={() => setShowTerminals(!showTerminals)}
               className={`p-1.5 text-[10px] font-mono rounded-sm border transition cursor-pointer flex items-center gap-1 ${
@@ -915,34 +1229,69 @@ export const LiveOperationsMap: React.FC<LiveOperationsMapProps> = ({
 
           {/* Section 2: Quick Tanker Selector List */}
           <div className="pt-3 border-t border-white/10 space-y-2">
-            <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest block">
-              Registered BRV Assets ({displayedTankers.length})
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest block">
+                Registered BRV Assets ({displayedTankers.length})
+              </span>
+              <span className="text-[8px] font-mono text-slate-500">Hover to locate</span>
+            </div>
 
-            <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
               {displayedTankers.map(t => {
                 const isSelected = selectedTankerId === t.tankerId;
+                const isHovered = hoveredTankerId === t.tankerId;
+                const simPos = simulatedPositions[t.tankerId] || t;
+                const volumeText = simPos.cargoVolume > 0 ? `${(simPos.cargoVolume / 1000).toFixed(0)}k L` : '0 L';
+
                 return (
                   <button
                     key={t.tankerId}
                     onClick={() => handleFocusTanker(t.tankerId)}
+                    onMouseEnter={() => {
+                      setHoveredTankerId(t.tankerId);
+                      if (markersRef.current[t.tankerId]) {
+                        markersRef.current[t.tankerId].openTooltip();
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredTankerId(null);
+                      if (markersRef.current[t.tankerId]) {
+                        markersRef.current[t.tankerId].closeTooltip();
+                      }
+                    }}
                     className={`w-full text-left p-2 rounded-sm border text-xs font-mono transition flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? 'bg-white/10 border-[#FF6B00] text-white shadow-sm'
+                        : isHovered
+                        ? 'bg-white/5 border-[#FF6B00]/60 text-white'
                         : 'bg-[#0A0A0B] border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${
+                    <div className="flex items-center gap-2 overflow-hidden pr-1">
+                      <span className={`w-2 h-2 shrink-0 rounded-full ${
                         t.status === 'IN_TRANSIT' ? 'bg-[#FF6B00]' :
                         t.status === 'ON_DELIVERY' ? 'bg-amber-400' :
                         t.status === 'AVAILABLE' ? 'bg-emerald-400' : 'bg-rose-400'
                       }`} />
-                      <span className="font-bold text-white">{t.tankerId}</span>
+                      <div className="truncate">
+                        <div className="flex items-center gap-1.5 leading-none">
+                          <span className="font-bold text-white text-[11px]">{t.tankerId}</span>
+                          <span className="text-[9px] text-[#FF6B00] font-bold">({volumeText})</span>
+                        </div>
+                        <span className="text-[9px] text-slate-500 truncate block mt-0.5">
+                          {simPos.driverName ? `${simPos.driverName} • ` : ''}{t.speedKmH > 0 ? `${t.speedKmH} km/h` : t.status.replace('_', ' ')}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[10px]">
-                      <span className="text-slate-500">{t.speedKmH} km/h</span>
+                    <div className="flex items-center gap-1.5 text-[10px] shrink-0">
+                      <span className={`text-[9px] font-bold px-1 py-0.5 rounded-xs ${
+                        t.status === 'IN_TRANSIT' ? 'bg-[#FF6B00]/10 text-[#FF6B00]' :
+                        t.status === 'ON_DELIVERY' ? 'bg-amber-500/10 text-amber-400' :
+                        t.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+                      }`}>
+                        {t.status === 'IN_TRANSIT' ? 'TRANSIT' : t.status === 'ON_DELIVERY' ? 'DELIVERY' : t.status === 'AVAILABLE' ? 'READY' : 'MAINT'}
+                      </span>
                       <ChevronRight className="w-3 h-3 text-slate-500" />
                     </div>
                   </button>
