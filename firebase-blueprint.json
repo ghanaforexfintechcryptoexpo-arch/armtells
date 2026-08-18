@@ -1,0 +1,147 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role-based access for logistics management",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "role": { "type": "string", "enum": ["SUPER_ADMIN", "ADMIN", "DISPATCHER", "FINANCE", "DRIVER", "CUSTOMER"] },
+        "companyId": { "type": "string", "maxLength": 128 },
+        "assignedTankerId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "email", "role", "createdAt"]
+    },
+    "Tanker": {
+      "title": "Tanker",
+      "description": "Specialized Bulk Road Vehicle (BRV) petroleum asset",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "tankerId": { "type": "string", "maxLength": 50 },
+        "registrationNumber": { "type": "string", "maxLength": 50 },
+        "makeModel": { "type": "string", "maxLength": 100 },
+        "tankCapacityLiters": { "type": "number" },
+        "status": { "type": "string", "enum": ["AVAILABLE", "ON_DELIVERY", "IN_TRANSIT", "UNDER_MAINTENANCE", "OFFLINE"] },
+        "currentLocationName": { "type": "string", "maxLength": 150 },
+        "assignedDriverName": { "type": "string", "maxLength": 100 },
+        "calibrationCertificateNumber": { "type": "string", "maxLength": 100 },
+        "calibrationExpiry": { "type": "string", "maxLength": 50 },
+        "hasBottomLoading": { "type": "boolean" },
+        "hasVaporRecovery": { "type": "boolean" },
+        "hasDigitalFlowMeter": { "type": "boolean" },
+        "hasHighFlowPump": { "type": "boolean" },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "tankerId", "registrationNumber", "makeModel", "tankCapacityLiters", "status"]
+    },
+    "DeliveryRequest": {
+      "title": "DeliveryRequest",
+      "description": "Bulk petroleum haulage and delivery consignment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "requestNumber": { "type": "string", "maxLength": 50 },
+        "customerId": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "companyName": { "type": "string", "maxLength": 150 },
+        "customerPhone": { "type": "string", "maxLength": 30 },
+        "customerEmail": { "type": "string", "format": "email", "maxLength": 150 },
+        "pickupLocation": { "type": "string", "maxLength": 200 },
+        "deliveryLocation": { "type": "string", "maxLength": 200 },
+        "deliveryAddressDetails": { "type": "string", "maxLength": 300 },
+        "productType": { "type": "string", "maxLength": 50 },
+        "productName": { "type": "string", "maxLength": 100 },
+        "quantityLiters": { "type": "number" },
+        "preferredDate": { "type": "string", "maxLength": 50 },
+        "preferredTimeWindow": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["REQUEST_RECEIVED", "DISPATCH_CONFIRMED", "TANKER_ASSIGNED", "LOADING", "IN_TRANSIT", "ARRIVING", "DELIVERED", "CANCELLED"] },
+        "assignedTankerId": { "type": "string", "maxLength": 50 },
+        "assignedTankerReg": { "type": "string", "maxLength": 50 },
+        "assignedDriverName": { "type": "string", "maxLength": 100 },
+        "assignedDriverPhone": { "type": "string", "maxLength": 30 },
+        "quotedAmount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "requestNumber", "customerId", "customerName", "deliveryLocation", "productName", "quantityLiters", "status", "createdAt"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "Calculated transport tariff quotation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "quoteNumber": { "type": "string", "maxLength": 50 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "companyName": { "type": "string", "maxLength": 150 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "pickupLocation": { "type": "string", "maxLength": 200 },
+        "deliveryLocation": { "type": "string", "maxLength": 200 },
+        "productType": { "type": "string", "maxLength": 50 },
+        "quantityLiters": { "type": "number" },
+        "distanceKm": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "status": { "type": "string", "enum": ["PENDING", "CALCULATED", "APPROVED", "REJECTED"] },
+        "validUntil": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "quoteNumber", "customerName", "email", "deliveryLocation", "quantityLiters", "totalAmount", "status", "createdAt"]
+    },
+    "ProofOfDelivery": {
+      "title": "ProofOfDelivery",
+      "description": "Electronic proof of delivery with readings and verification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "deliveryId": { "type": "string", "maxLength": 128 },
+        "deliveryRequestNumber": { "type": "string", "maxLength": 50 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "companyName": { "type": "string", "maxLength": 150 },
+        "productName": { "type": "string", "maxLength": 100 },
+        "quantityDeliveredLiters": { "type": "number" },
+        "deliveryTimestamp": { "type": "string", "maxLength": 50 },
+        "deliveryAddress": { "type": "string", "maxLength": 200 },
+        "tankerReg": { "type": "string", "maxLength": 50 },
+        "driverName": { "type": "string", "maxLength": 100 },
+        "receiverFullName": { "type": "string", "maxLength": 100 },
+        "receiverTitle": { "type": "string", "maxLength": 100 },
+        "remarks": { "type": "string", "maxLength": 500 },
+        "isVerified": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "deliveryId", "deliveryRequestNumber", "customerName", "quantityDeliveredLiters", "receiverFullName", "isVerified"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles and administrative RBAC metadata"
+    },
+    "/tankers/{tankerId}": {
+      "schema": { "$ref": "#/entities/Tanker" },
+      "description": "Fleet assets registry and live status"
+    },
+    "/deliveries/{deliveryId}": {
+      "schema": { "$ref": "#/entities/DeliveryRequest" },
+      "description": "Petroleum dispatch orders and live transit tracking"
+    },
+    "/quotes/{quoteId}": {
+      "schema": { "$ref": "#/entities/Quote" },
+      "description": "Customer haulage price estimations and quotation requests"
+    },
+    "/proofOfDeliveries/{podId}": {
+      "schema": { "$ref": "#/entities/ProofOfDelivery" },
+      "description": "Verified discharge records and digital POD tickets"
+    }
+  }
+}

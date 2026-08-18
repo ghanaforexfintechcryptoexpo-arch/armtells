@@ -1,0 +1,6 @@
+{
+  "name": "Armtells Transport Services",
+  "description": "Petroleum Tanker Transportation, Bulk Fuel Logistics & Safe Fuel Delivery Services",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

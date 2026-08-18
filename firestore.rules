@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Catch-All Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'ghanaforexfintechcryptoexpo@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isSignedIn() && request.auth.uid == userId
+        && incoming().id == userId
+        && incoming().email is string && incoming().email.size() <= 150
+        && incoming().name is string && incoming().name.size() <= 100;
+      allow update: if isValidId(userId) && (
+        isAdmin() || 
+        (isOwner(userId) && incoming().id == existing().id && incoming().email == existing().email)
+      );
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // Tanker Fleet collection
+    match /tankers/{tankerId} {
+      allow get, list: if true;
+      allow create, update, delete: if isValidId(tankerId) && (isAdmin() || isSignedIn());
+    }
+
+    // Deliveries collection
+    match /deliveries/{deliveryId} {
+      allow get, list: if true;
+      allow create: if isValidId(deliveryId) && (
+        isSignedIn() || (incoming().customerName is string && incoming().customerName.size() <= 100)
+      );
+      allow update: if isValidId(deliveryId) && (
+        isAdmin() || isSignedIn() || (incoming().id == existing().id)
+      );
+      allow delete: if isValidId(deliveryId) && isAdmin();
+    }
+
+    // Quotes collection
+    match /quotes/{quoteId} {
+      allow get, list: if true;
+      allow create: if isValidId(quoteId) && incoming().customerName is string;
+      allow update: if isValidId(quoteId) && (isAdmin() || isSignedIn());
+      allow delete: if isValidId(quoteId) && isAdmin();
+    }
+
+    // Proof of Deliveries
+    match /proofOfDeliveries/{podId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(podId) && (isAdmin() || isSignedIn());
+      allow delete: if isValidId(podId) && isAdmin();
+    }
+
+    // Test connection doc
+    match /test/{docId} {
+      allow read: if true;
+    }
+  }
+}
